@@ -41,7 +41,7 @@ Use at your own risk!
 - -r (h/l) Image resolution size h=5376x2688 l=2048x1024 Set the resolution of the image. I may depricate this and use -K.
 - -i (iso) Camera iso ex. 100, 125, 160, 200, 250, 320, 400, 500, 640, 800, 1000, 1250, 1600
 - -s (shutter speed) Floating point or integer, based on wifi api. ie 0.0004=1/2500, 0.04=1/25, 0.4=1/2.5, 4=4 seconds.
-- -w (White Balance) In WIFI mode (auto, daylight, shade, etc) USB mode in hex? (2, 4 ,8001) Check the api guides for details.
+- -w (White Balance) In WIFI mode (auto, daylight, shade, etc) USB mode in hex? (2, 4 ,8001) Check the api guides for details. [WiFi v2.0](https://developers.theta360.com/en/docs/v2.0/api_reference/options/white_balance.html)
 - -O (Output path /) Path to where you would like output image files.
 - -d (0/1) if images are downloaded delete them from the camera.
 - -F Config file - NOT SUPPORTED YET
@@ -61,8 +61,34 @@ Copyright 2016 - Jason Charcalla
 
 Added by THETA360
 
+## Using Wifi Connection From Laptop
+If you are running this on a Mac laptop, you need to set the script to WiFi with the capital _W_ flag `-W`. You'll also need to adjust the
+[whiteBalance](https://developers.theta360.com/en/docs/v2.0/api_reference/options/white_balance.html). This command works with WiFi.
+
+```
+./tlapser360.sh -W y -I 5 -C 5 -m 1 -r h -i 100 -s 0.5 -w auto -O /mnt/tmp/tlapser_test/
+```
+
+In the example above, the
+[whiteBalance](https://developers.theta360.com/en/docs/v2.0/api_reference/options/white_balance.html) is set to auto. You can replace _auto_ with these parameters. That is a lowercase _w_ in front of _auto_.
+
+* auto: Auto
+* daylight: Outdoor
+* shade: Shade
+* cloudy-daylight: Cloudy
+* incandescent: Incandescent light 1
+* _warmWhiteFluorescent: Incandescent light 2
+* _dayLightFluorescent: Fluorescent light 1 (daylight)
+* _dayWhiteFluorescent: Fluorescent light 2 (natural white)
+* fluorescent: Fluorescent light 3 (white)
+* _bulbFluorescent: Fluorescent light 4 (light bulb color)
+
+There is a [discussion](http://lists.theta360.guide/t/external-intervalometer/579?u=codetricity) of using this script on a Mac OS laptop.
+
+## Parts
 [Adafruit TSL2561 Digital Luminosity/Lux/Light Sensor Breakout](https://www.adafruit.com/products/439) $5.95
 
+## Discussion
 [Discussion](http://community.theta360.guide/t/live-leaf-peeping-digital-repeat-photography/507/10?u=codetricity)
 
 
