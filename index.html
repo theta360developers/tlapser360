@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Tlapser360 for RICOH THETA by theta360developers</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Tlapser360 for RICOH THETA</h1>
+        <h2>Use a USB cable or WiFi to shoot time lapse 360 photos with the RICOH THETA</h2>
+        <a href="https://github.com/theta360developers/tlapser360" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p><img src="https://raw.githubusercontent.com/theta360developers/tlapser360/master/img/jason-charcalla-spotlight.png" alt=""></p>
+
+<p>Original repository is here
+<a href="https://github.com/jcharcalla/tlapser360">https://github.com/jcharcalla/tlapser360</a></p>
+
+<h1>
+<a id="tlapser360" class="anchor" href="#tlapser360" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>tlapser360</h1>
+
+<p>Used to shoot time lapse 360 photos with cameras that support the Open Spherical Camera API.</p>
+
+<p>This is a proof of concept script I wrote to run on  a raspberry pi with a Ricoh Theta S camera. I initially wrote this as an attempt to get my Theta S camera to shoot stills faster than using the built in intervalometer. In testing I was able to shave about 2 seconds from the shooting time, This however only seems to work using WIFI and not the USB. It also supports geotaging with gpsd and camera metering via an adafruit LUX meter. Metering features are still a work in progress and require a familiarity with the Raspberry pi GPIO interface. With metering enabled you can force the exposure to ramp in a single direction, this is useful for things like sunrise and sunset. Communication with the camera can be done with via wifi or usb. USB features are new and with the rest of the script are experimental, I've had problems with my camera becoming un-responsive and needing power cycling. If you do not need the GPS or metered exposure settings of this script and only want the ability to capture, download, and delete images from the camera you may want to look at using ptpcam alone 'ptpcam --loop-capture=5 --interval=3'.</p>
+
+<p>Early test footage can be found here: <a href="https://www.youtube.com/watch?v=IugTnvYjy6A">https://www.youtube.com/watch?v=IugTnvYjy6A</a></p>
+
+<p>Use at your own risk!</p>
+
+<h3>
+<a id="prereqs" class="anchor" href="#prereqs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Prereqs:</h3>
+
+<ul>
+<li><p>GPS support relies on gpsd and gpsd-clients being installed and configured.</p></li>
+<li><p>The bc package is needed for maths.</p></li>
+<li><p>LUX meter support was tested with a adafruit TSL2561 and some tweaks to IainColledge's
+example script. See this variable "LUX_METER_SCRIPT"
+<a href="https://github.com/IainColledge/Adafruit-Raspberry-Pi-Python-Code">https://github.com/IainColledge/Adafruit-Raspberry-Pi-Python-Code</a></p></li>
+<li><p>Theta s Usb support with libptp, Thanks to codetricity for the howto
+<a href="http://lists.theta360.guide/t/ricoh-theta-s-api-over-usb-cable/65/3">http://lists.theta360.guide/t/ricoh-theta-s-api-over-usb-cable/65/3</a></p></li>
+</ul>
+
+<h3>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage:</h3>
+
+<ul>
+<li>-I (Interval seconds) : This sets the sleep interval time between photos. Be aware this does not take into consideration any latency added by features of this script such as image downloads, usb control, gps metat data injection, ilong exposures, etc. This means if you set a 10 second interval your photos may be taken every 12 seconds. You can also set this to a lower threshold than the Ricoh Theta S can shoot using it's built in intervalometer. In testing I've been able to shoot a photo ever 3 seconds in low resolution and 5 seconds in high res without over running the on cammera buffer.</li>
+<li>-U (y/n) default n. Usb mode for Ricoh Theta S. This will control the camera over usb and requires libptp and gphoto2.</li>
+<li>-W (y/n) Default y Wifi mode unless USB mode is enabled. Control the camera using the direct wifi connection and Opens Spherical camera API.</li>
+<li>-C (Image count) How many total images you would like to take.</li>
+<li>-m (Exposure Program mode 1 2 4 9) 1 for Auto, 2 for Manual</li>
+<li>-G (0/1) GPS metadata injection. This relies on GPSD being installed and properly configured. It may also introduce latency so adjust your interval accordingly.</li>
+<li>-T (GPS Track log path and file name) Write a gps track log, relies on GPSD.</li>
+<li>-r (h/l) Image resolution size h=5376x2688 l=2048x1024 Set the resolution of the image. I may depricate this and use -K.</li>
+<li>-i (iso) Camera iso ex. 100, 125, 160, 200, 250, 320, 400, 500, 640, 800, 1000, 1250, 1600</li>
+<li>-s (shutter speed) Floating point or integer, based on wifi api. ie 0.0004=1/2500, 0.04=1/25, 0.4=1/2.5, 4=4 seconds.</li>
+<li>-w (White Balance) In WIFI mode (auto, daylight, shade, etc) USB mode in hex? (2, 4 ,8001) Check the api guides for details. <a href="https://developers.theta360.com/en/docs/v2.0/api_reference/options/white_balance.html">WiFi v2.0</a>
+</li>
+<li>-O (Output path /) Path to where you would like output image files.</li>
+<li>-d (0/1) if images are downloaded delete them from the camera.</li>
+<li>-F Config file - NOT SUPPORTED YET</li>
+<li>-M (0/1) use a TSL2561 LUX sensor for metering. if used we will add time to your interval</li>
+<li>-R Ramp exposure speed up (longer shutter - Sunset) or down (shorter/faster shutter - Sunrise) based on external LUX meter.</li>
+<li>-A (time) Sunrise time (24hr no : ex, 6:00AM=600) -P Sunset time (24hr no ":" ex, 7:00PM=1900)</li>
+</ul>
+
+<h4>
+<a id="example" class="anchor" href="#example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Example:</h4>
+
+<ul>
+<li>Using USB take a large resolution photo every 5 seconds for a total of 5 images with the camera set to manual mode, iso 100, white balance auto, and a shutter speed of .5 seconds while writing the images to a directory and leaving them on the camera..</li>
+</ul>
+
+<pre><code>./tlapser360.sh -U y -I 5 -C 5 -m 1 -r h -i 100 -s 0.5 -w 2 -O /mnt/tmp/tlapser_test/
+</code></pre>
+
+<p>Copyright 2016 - Jason Charcalla</p>
+
+<h2></h2>
+
+<p>Added by THETA360</p>
+
+<h2>
+<a id="using-wifi-connection-from-laptop" class="anchor" href="#using-wifi-connection-from-laptop" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using Wifi Connection From Laptop</h2>
+
+<p>If you are running this on a Mac laptop, you need to set the script to WiFi with the capital <em>W</em> flag <code>-W</code>. You'll also need to adjust the
+<a href="https://developers.theta360.com/en/docs/v2.0/api_reference/options/white_balance.html">whiteBalance</a>. This command works with WiFi.</p>
+
+<pre><code>./tlapser360.sh -W y -I 5 -C 5 -m 1 -r h -i 100 -s 0.5 -w auto -O /mnt/tmp/tlapser_test/
+</code></pre>
+
+<p>In the example above, the
+<a href="https://developers.theta360.com/en/docs/v2.0/api_reference/options/white_balance.html">whiteBalance</a> is set to auto. You can replace <em>auto</em> with these parameters. That is a lowercase <em>w</em> in front of <em>auto</em>.</p>
+
+<ul>
+<li>auto: Auto</li>
+<li>daylight: Outdoor</li>
+<li>shade: Shade</li>
+<li>cloudy-daylight: Cloudy</li>
+<li>incandescent: Incandescent light 1</li>
+<li>_warmWhiteFluorescent: Incandescent light 2</li>
+<li>_dayLightFluorescent: Fluorescent light 1 (daylight)</li>
+<li>_dayWhiteFluorescent: Fluorescent light 2 (natural white)</li>
+<li>fluorescent: Fluorescent light 3 (white)</li>
+<li>_bulbFluorescent: Fluorescent light 4 (light bulb color)</li>
+</ul>
+
+<p>There is a <a href="http://lists.theta360.guide/t/external-intervalometer/579?u=codetricity">discussion</a> of using this script on a Mac OS laptop.</p>
+
+<h2>
+<a id="parts" class="anchor" href="#parts" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Parts</h2>
+
+<p><a href="https://www.adafruit.com/products/439">Adafruit TSL2561 Digital Luminosity/Lux/Light Sensor Breakout</a> $5.95</p>
+
+<p><img src="https://raw.githubusercontent.com/theta360developers/tlapser360/master/img/lux.png" alt=""></p>
+
+<h2>
+<a id="sample-screen-grabs" class="anchor" href="#sample-screen-grabs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sample Screen Grabs</h2>
+
+<p>These are screen grabs from the YouTube video. The original resolution of the images is higher. The lux sensor above is
+adjusting the camera.</p>
+
+<p><img src="https://raw.githubusercontent.com/theta360developers/tlapser360/master/img/dawn.png" alt=""></p>
+
+<p><img src="https://raw.githubusercontent.com/theta360developers/tlapser360/master/img/morning.png" alt=""></p>
+
+<p><img src="https://raw.githubusercontent.com/theta360developers/tlapser360/master/img/day.png" alt=""></p>
+
+<p><img src="https://raw.githubusercontent.com/theta360developers/tlapser360/master/img/dusk.png" alt=""></p>
+
+<p>In the screengrab below, I changed the 360 view up to illustrate that at any time you can look up or turn the video around and see the view behind you.</p>
+
+<p><img src="https://raw.githubusercontent.com/theta360developers/tlapser360/master/img/stars.png" alt=""></p>
+
+<h2>
+<a id="discussion" class="anchor" href="#discussion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Discussion</h2>
+
+<p><a href="http://community.theta360.guide/t/live-leaf-peeping-digital-repeat-photography/507/10?u=codetricity">Discussion</a></p>
+
+<p><img src="https://ga-beacon.appspot.com/UA-73311422-5/tlapser360" alt="Analytics"></p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/theta360developers/tlapser360/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/theta360developers/tlapser360/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/theta360developers/tlapser360"></a> is maintained by <a href="https://github.com/theta360developers">theta360developers</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
