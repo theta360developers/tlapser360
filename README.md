@@ -88,6 +88,26 @@ There is a [discussion](http://lists.theta360.guide/t/external-intervalometer/57
 ## Parts
 [Adafruit TSL2561 Digital Luminosity/Lux/Light Sensor Breakout](https://www.adafruit.com/products/439) $5.95
 
+![](img/lux.png)
+
+## Sample Screen Grabs
+
+These are screen grabs from the YouTube video. The original resolution of the images is higher. The lux sensor above is
+adjusting the camera.
+
+![](img/dawn.png)
+
+![](img/morning.png)
+
+![](img/day.png)
+
+![](img/dusk.png)
+
+In the screengrab below, I changed the 360 view up to illustrate that at any time you can look up or turn the video around and see the view behind you.
+
+![](img/stars.png)
+
+
 ## Discussion
 [Discussion](http://community.theta360.guide/t/live-leaf-peeping-digital-repeat-photography/507/10?u=codetricity)
 
